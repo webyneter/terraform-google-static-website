@@ -18,7 +18,7 @@ resource "google_compute_managed_ssl_certificate" "website" {
   # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_managed_ssl_certificate
   provider = google
 
-  name = "${coalesce(var.compat_website_ssl_certificate_name, "${var.app_name}-ssl-certificate")}-${random_id.website_ssl_certificate.hex}"
+  name = "${coalesce(var.compat_website_ssl_certificate_name, "${var.website_name}-ssl-certificate")}-${random_id.website_ssl_certificate.hex}"
 
   managed {
     domains = [var.website_domain]
