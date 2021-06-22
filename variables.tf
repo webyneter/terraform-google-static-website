@@ -39,9 +39,11 @@ variable "website_index_page_file_name" {
 variable "compat_website_external_ip_name" {
   description = "The optional name of the pre-existing External IP to facilitate backward compatibility"
   type        = string
+  default     = null
 }
 
 variable "compat_website_ssl_certificate_name" {
   description = "The optional name of the pre-existing SSL/TLS certificate to facilitate backward compatibility"
   type        = string
+  default     = null
 }
