@@ -10,6 +10,10 @@ output "bucket_service_account_private_key_filename" {
   value = local_file.website_service_account_private_key.filename
 }
 
+output "bucket_backend_name" {
+  value = google_compute_backend_bucket.website.name
+}
+
 output "website_external_ip_name" {
   value = google_compute_global_address.website_external_ip.name
 }
