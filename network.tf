@@ -119,10 +119,10 @@ resource "google_compute_url_map" "website" {
     default_service = coalesce(var.website_url_map_path_matcher.default_service, google_compute_backend_bucket.website.id)
 
     path_rule {
-      paths   = coalesce(var.website_url_map_path_matcher.path_rule_paths, ["/"])
+      paths = coalesce(var.website_url_map_path_matcher.path_rule_paths, ["/"])
 
       # coalesce would opt for the default BOTH for "" and null whereas null is a valid value here.
-      service = local.website_url_path_matcher.path_rule_service != "" ? local.website_url_path_matcher.path_rule_service : google_compute_backend_bucket.website.id
+      service = local.website_url_map_path_matcher.path_rule_service != "" ? local.website_url_map_path_matcher.path_rule_service : google_compute_backend_bucket.website.id
 
       dynamic "route_action" {
         for_each = coalesce(var.website_url_map_path_matcher.path_rule_route_action, [])
