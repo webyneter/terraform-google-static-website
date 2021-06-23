@@ -37,6 +37,7 @@ resource "google_compute_backend_bucket" "website" {
   name        = "${google_storage_bucket.website.name}-backend"
   bucket_name = google_storage_bucket.website.name
   custom_response_headers = [
+    # TODO: allow for customization
     # https://cloud.google.com/load-balancing/docs/https/setting-up-http-https-redirect#adding_a_custom_header
     "Strict-Transport-Security:max-age=31536000; includeSubDomains; preload"
   ]
@@ -80,35 +81,46 @@ resource "google_compute_url_map" "website" {
   name = "${var.website_name}-urlmap"
 
   test {
-    host    = var.website_domain
-    path    = "/"
-    service = google_compute_backend_bucket.website.id
+    description = coalesce(var.website_url_map_test.description, "Root path test case")
+    host        = coalesce(var.website_url_map_test.host, var.website_domain)
+    path        = coalesce(var.website_url_map_test.path, "/")
+    service     = coalesce(var.website_url_map_test.service, google_compute_backend_bucket.website.id)
+  }
+  dynamic "test" {
+    for_each = var.website_url_map_tests
+    content {
+      description = test.value.description
+      host        = test.value.host
+      path        = test.value.path
+      service     = test.value.service
+    }
   }
 
   default_service = coalesce(var.website_url_map_default_service, google_compute_backend_bucket.website.id)
 
   host_rule {
-    hosts = [
+    description = coalesce(var.website_url_host_rule.description, "Host rule")
+    hosts = coalesce(var.website_url_host_rule.hosts, [
       var.website_domain
-    ]
-    path_matcher = "default-path"
+    ])
+    path_matcher = coalesce(var.website_url_host_rule.path_matcher, local.website_url_map_path_name)
   }
-  path_matcher {
-    name            = "default-path"
-    default_service = coalesce(var.website_url_map_path_matcher_default_service, google_compute_backend_bucket.website.id)
-
-    path_rule {
-      paths   = ["/"]
-      service = google_compute_backend_bucket.website.id
-    }
-  }
-
   dynamic "host_rule" {
     for_each = var.website_url_map_host_rules
     content {
       description  = host_rule.value.description
       hosts        = host_rule.value.hosts
       path_matcher = host_rule.value.path_matcher
+    }
+  }
+
+  path_matcher {
+    name            = coalesce(var.website_url_path_matcher.name, local.website_url_map_path_name)
+    default_service = coalesce(var.website_url_path_matcher.default_service, google_compute_backend_bucket.website.id)
+
+    path_rule {
+      paths   = coalesce(var.website_url_path_matcher.path_rule_paths, ["/"])
+      service = coalesce(var.website_url_path_matcher.path_rule_service, google_compute_backend_bucket.website.id)
     }
   }
   dynamic "path_matcher" {

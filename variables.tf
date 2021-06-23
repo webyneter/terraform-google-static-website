@@ -32,30 +32,67 @@ variable "website_index_page_file_name" {
   default     = "index.html"
 }
 
+variable "website_url_map_test" {
+  description = "The custom configuration for the URL map's pre-existing test"
+  type = object({
+    description = optional(string)
+    host        = optional(string)
+    path        = optional(string)
+    service     = optional(string)
+  })
+  default = {}
+}
+
+variable "website_url_map_tests" {
+  description = "The URL map's tests"
+  type = list(object({
+    description = optional(string)
+    host        = string
+    path        = string
+    service     = string
+  }))
+  default = []
+}
+
 variable "website_url_map_default_service" {
   description = "The id of a service to be used as the website URL map's default_service"
   type        = string
   default     = null
 }
 
-variable "website_url_map_path_matcher_default_service" {
-  description = "The id of a service to be used as the website URL map's default path matcher-level default_service"
-  type        = string
-  default     = null
+variable "website_url_host_rule" {
+  description = "The custom configuration for the URL map's pre-existing host rule"
+  type = object({
+    description  = optional(string)
+    hosts        = optional(set(string))
+    path_matcher = optional(string)
+  })
+  default = {}
 }
 
 variable "website_url_map_host_rules" {
-  description = ""
+  description = "The URL map's host rules"
   type = list(object({
     description  = optional(string)
-    hosts        = list(string)
+    hosts        = set(string)
     path_matcher = string
   }))
   default = []
 }
 
+variable "website_url_path_matcher" {
+  description = "The custom configuration for the URL map's pre-existing path matcher"
+  type = object({
+    name              = optional(string)
+    default_service   = optional(string)
+    path_rule_paths   = optional(set(string))
+    path_rule_service = optional(string)
+  })
+  default = {}
+}
+
 variable "website_url_map_path_matchers" {
-  description = ""
+  description = "The URL map's path matchers"
   type = list(object({
     name        = string
     description = optional(string)
