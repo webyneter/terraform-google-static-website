@@ -87,6 +87,89 @@ variable "website_url_path_matcher" {
     default_service   = optional(string)
     path_rule_paths   = optional(set(string))
     path_rule_service = optional(string)
+    extra_path_rules = optional(list(object({
+      paths   = set(string)
+      service = optional(string)
+
+      route_action = optional(list(object({
+        cors_policy = optional(list(object({
+          allow_credentials    = optional(bool)
+          allow_headers        = optional(list(string))
+          allow_methods        = optional(list(string))
+          allow_origin_regexes = optional(list(string))
+          allow_origins        = optional(list(string))
+          disabled             = optional(bool)
+          expose_headers       = optional(list(string))
+          max_age              = optional(number)
+        })))
+
+        fault_injection_policy = optional(list(object({
+          abort = optional(list(object({
+            http_status = number
+            percentage  = number
+          })))
+          delay = optional(list(object({
+            fixed_delay = list(object({
+              seconds = string
+              nanos   = optional(number)
+            }))
+            percentage = number
+          })))
+        })))
+
+        request_mirror_policy = optional(list(object({
+          backend_service = string
+        })))
+
+        retry_policy = optional(list(object({
+          per_try_timeout = optional(list(object({
+            seconds = string
+            nanos   = optional(number)
+          })))
+          num_retries      = optional(number)
+          retry_conditions = optional(list(string))
+        })))
+
+        timeout = optional(list(object({
+          seconds = string
+          nanos   = optional(number)
+        })))
+
+        url_rewrite = optional(list(object({
+          host_rewrite        = optional(string)
+          path_prefix_rewrite = optional(string)
+        })))
+
+        weighted_backend_services = optional(list(object({
+          header_action = optional(list(object({
+            request_headers_to_add = optional(list(object({
+              header_name  = string
+              header_value = string
+              replace      = bool
+            })))
+            request_headers_to_remove = optional(list(string))
+            response_headers_to_add = optional(list(object({
+              header_name  = string
+              header_value = string
+              replace      = bool
+            })))
+            response_headers_to_remove = optional(list(string))
+          })))
+          backend_service = string
+          weight          = string
+        })))
+      })))
+
+      url_redirect = optional(list(object({
+        strip_query            = bool
+        host_redirect          = optional(string)
+        https_redirect         = optional(bool)
+        path_redirect          = optional(string)
+        prefix_redirect        = optional(string)
+        redirect_response_code = optional(string)
+      })))
+    })))
+
   })
   default = {}
 }
