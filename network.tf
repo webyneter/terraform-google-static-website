@@ -99,11 +99,11 @@ resource "google_compute_url_map" "website" {
   default_service = coalesce(var.website_url_map_default_service, google_compute_backend_bucket.website.id)
 
   host_rule {
-    description = coalesce(var.website_url_host_rule.description, "Host rule")
-    hosts = coalesce(var.website_url_host_rule.hosts, [
+    description = coalesce(var.website_url_map_host_rule.description, "Host rule")
+    hosts = coalesce(var.website_url_map_host_rule.hosts, [
       var.website_domain
     ])
-    path_matcher = coalesce(var.website_url_host_rule.path_matcher, local.website_url_map_path_name)
+    path_matcher = coalesce(var.website_url_map_host_rule.path_matcher, local.website_url_map_path_name)
   }
   dynamic "host_rule" {
     for_each = var.website_url_map_host_rules
@@ -115,15 +115,143 @@ resource "google_compute_url_map" "website" {
   }
 
   path_matcher {
-    name            = coalesce(var.website_url_path_matcher.name, local.website_url_map_path_name)
-    default_service = coalesce(var.website_url_path_matcher.default_service, google_compute_backend_bucket.website.id)
+    name            = coalesce(var.website_url_map_path_matcher.name, local.website_url_map_path_name)
+    default_service = coalesce(var.website_url_map_path_matcher.default_service, google_compute_backend_bucket.website.id)
 
     path_rule {
-      paths   = coalesce(var.website_url_path_matcher.path_rule_paths, ["/"])
-      service = coalesce(var.website_url_path_matcher.path_rule_service, google_compute_backend_bucket.website.id)
+      paths   = coalesce(var.website_url_map_path_matcher.path_rule_paths, ["/"])
+
+      # coalesce would opt for the default BOTH for "" and null whereas null is a valid value here.
+      service = local.website_url_path_matcher.path_rule_service != "" ? local.website_url_path_matcher.path_rule_service : google_compute_backend_bucket.website.id
+
+      dynamic "route_action" {
+        for_each = coalesce(var.website_url_map_path_matcher.path_rule_route_action, [])
+        content {
+          dynamic "cors_policy" {
+            for_each = coalesce(route_action.value.cors_policy, [])
+            content {
+              allow_credentials    = cors_policy.value.allow_credentials
+              allow_headers        = cors_policy.value.allow_headers
+              allow_methods        = cors_policy.value.allow_methods
+              allow_origin_regexes = cors_policy.value.allow_origin_regexes
+              allow_origins        = cors_policy.value.allow_origins
+              disabled             = cors_policy.value.disabled
+              expose_headers       = cors_policy.value.expose_headers
+              max_age              = cors_policy.value.max_age
+            }
+          }
+
+          dynamic "fault_injection_policy" {
+            for_each = coalesce(route_action.value.fault_injection_policy, [])
+            content {
+              dynamic "abort" {
+                for_each = coalesce(fault_injection_policy.value.abort, [])
+                content {
+                  http_status = abort.value.http_status
+                  percentage  = abort.value.percentage
+                }
+              }
+              dynamic "delay" {
+                for_each = coalesce(fault_injection_policy.value.delay, [])
+                content {
+                  dynamic "fixed_delay" {
+                    for_each = coalesce(delay.value.fixed_delay, [])
+                    content {
+                      nanos   = fixed_delay.value.nanos
+                      seconds = fixed_delay.value.seconds
+                    }
+                  }
+                  percentage = delay.value.percentage
+                }
+              }
+            }
+          }
+
+          dynamic "request_mirror_policy" {
+            for_each = coalesce(route_action.value.request_mirror_policy, [])
+            content {
+              backend_service = request_mirror_policy.value.backend_service
+            }
+          }
+
+          dynamic "retry_policy" {
+            for_each = coalesce(route_action.value.retry_policy, [])
+            content {
+              dynamic "per_try_timeout" {
+                for_each = coalesce(retry_policy.value.per_try_timeout, [])
+                content {
+                  seconds = per_try_timeout.value.seconds
+                  nanos   = per_try_timeout.value.nanos
+                }
+              }
+              num_retries      = retry_policy.value.num_retries
+              retry_conditions = retry_policy.value.retry_conditions
+            }
+          }
+
+          dynamic "timeout" {
+            for_each = coalesce(route_action.value.timeout, [])
+            content {
+              seconds = timeout.value.seconds
+              nanos   = timeout.value.nanos
+            }
+          }
+
+          dynamic "url_rewrite" {
+            for_each = coalesce(route_action.value.url_rewrite, [])
+            content {
+              host_rewrite        = url_rewrite.value.host_rewrite
+              path_prefix_rewrite = url_rewrite.value.path_prefix_rewrite
+            }
+          }
+
+          dynamic "weighted_backend_services" {
+            for_each = coalesce(route_action.value.weighted_backend_services, [])
+            content {
+              dynamic "header_action" {
+                for_each = coalesce(weighted_backend_services.value.header_action, [])
+                content {
+                  dynamic "request_headers_to_add" {
+                    for_each = coalesce(header_action.value.request_headers_to_add, [])
+                    content {
+                      header_name  = request_headers_to_add.value.header_name
+                      header_value = request_headers_to_add.value.header_value
+                      replace      = request_headers_to_add.value.replace
+                    }
+                  }
+                  request_headers_to_remove = header_action.value.request_headers_to_remove
+                  dynamic "response_headers_to_add" {
+                    for_each = coalesce(header_action.value.response_headers_to_add, [])
+                    content {
+                      header_name  = response_headers_to_add.value.header_name
+                      header_value = response_headers_to_add.value.header_value
+                      replace      = response_headers_to_add.value.replace
+                    }
+                  }
+                  response_headers_to_remove = header_action.value.response_headers_to_remove
+                }
+              }
+              backend_service = weighted_backend_services.value.backend_service
+              weight          = weighted_backend_services.value.weight
+            }
+          }
+        }
+      }
+
+      dynamic "url_redirect" {
+        for_each = coalesce(var.website_url_map_path_matcher.path_rule_url_redirect, [])
+        content {
+          strip_query            = url_redirect.value.strip_query
+          host_redirect          = url_redirect.value.host_redirect
+          https_redirect         = url_redirect.value.https_redirect
+          path_redirect          = url_redirect.value.path_redirect
+          prefix_redirect        = url_redirect.value.prefix_redirect
+          redirect_response_code = url_redirect.value.redirect_response_code
+        }
+      }
     }
     dynamic "path_rule" {
-      for_each = coalesce(var.website_url_path_matcher.extra_path_rules, [])
+      for_each = coalesce(var.website_url_map_path_matcher.extra_path_rules, [])
       content {
         paths   = path_rule.value.paths
         service = path_rule.value.service
