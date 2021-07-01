@@ -34,13 +34,9 @@ resource "google_compute_backend_bucket" "website" {
   # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_backend_bucket
   provider = google-beta
 
-  name        = "${google_storage_bucket.website.name}-backend"
-  bucket_name = google_storage_bucket.website.name
-  custom_response_headers = [
-    # TODO: allow for customization
-    # https://cloud.google.com/load-balancing/docs/https/setting-up-http-https-redirect#adding_a_custom_header
-    "Strict-Transport-Security:max-age=31536000; includeSubDomains; preload"
-  ]
+  name                    = "${google_storage_bucket.website.name}-backend"
+  bucket_name             = google_storage_bucket.website.name
+  custom_response_headers = var.bucket_backend_custom_response_headers
 }
 
 resource "google_compute_url_map" "website_http_to_https_redirect" {

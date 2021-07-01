@@ -26,6 +26,15 @@ variable "bucket_service_account_private_key_dir_path" {
 # Optional variables
 # ==================
 
+variable "bucket_backend_custom_response_headers" {
+  description = "Bucket backend custom response headers"
+  type        = list(string)
+  default = [
+    # https://cloud.google.com/load-balancing/docs/https/setting-up-http-https-redirect#adding_a_custom_header
+    "Strict-Transport-Security:max-age=31536000; includeSubDomains; preload"
+  ]
+}
+
 variable "website_index_page_file_name" {
   description = "The name of the website's index file"
   type        = string
