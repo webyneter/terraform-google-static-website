@@ -2,6 +2,11 @@
 # Required variables
 # ==================
 
+variable "project" {
+  description = "The project id"
+  type        = string
+}
+
 variable "website_name" {
   description = "The DNS-compatible name of the website"
   type        = string

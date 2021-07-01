@@ -3,6 +3,8 @@ resource "google_storage_bucket" "website" {
   # https://cloud.google.com/storage/docs/hosting-static-website#create-bucket
   provider = google
 
+  project = var.project
+
   name                        = "${var.website_name}-bucket"
   location                    = upper(var.bucket_region)
   storage_class               = "STANDARD"
@@ -32,6 +34,8 @@ resource "google_storage_bucket_iam_member" "website_public" {
 resource "google_service_account" "website" {
   # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_service_account
   provider = google
+
+  project = var.project
 
   # Forcing the name to match the pre-defined regex "^[a-z](?:[-a-z0-9]{4,28}[a-z0-9])$":
   account_id = trim(substr(google_storage_bucket.website.name, 0, 28), "-")
