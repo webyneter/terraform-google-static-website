@@ -52,9 +52,3 @@ resource "google_service_account_key" "website" {
 
   service_account_id = google_service_account.website.name
 }
-
-resource "local_file" "website_service_account_private_key" {
-  # https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file
-  filename          = "${var.bucket_service_account_private_key_dir_path}/${google_service_account.website.email}.json"
-  sensitive_content = base64decode(google_service_account_key.website.private_key)
-}

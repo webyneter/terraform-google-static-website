@@ -17,11 +17,6 @@ variable "bucket_region" {
   type        = string
 }
 
-variable "bucket_service_account_private_key_dir_path" {
-  description = "The file system path to the directory for the bucket's Service Account private key file"
-  type        = string
-}
-
 # ==================
 # Optional variables
 # ==================
