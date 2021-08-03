@@ -5,7 +5,7 @@ resource "google_storage_bucket" "website" {
 
   project = var.project
 
-  name                        = "${var.website_name}-bucket"
+  name                        = local.website_bucket_name
   location                    = upper(var.bucket_region)
   storage_class               = "STANDARD"
   uniform_bucket_level_access = true
@@ -16,6 +16,11 @@ resource "google_storage_bucket" "website" {
     # Why: https://stackoverflow.com/a/40786636/1557013
     # How so: https://cloud.google.com/storage/docs/gsutil/commands/web
     not_found_page = var.website_index_page_file_name
+  }
+
+  logging {
+    log_bucket        = google_storage_bucket.website_usage_logs.name
+    log_object_prefix = replace(var.website_domain, ".", "-")
   }
 }
 
