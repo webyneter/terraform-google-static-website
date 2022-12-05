@@ -10,6 +10,8 @@ resource "google_storage_bucket" "website" {
   storage_class               = "STANDARD"
   uniform_bucket_level_access = true
 
+  force_destroy = var.website_bucket_force_destroy
+
   website {
     main_page_suffix = var.website_index_page_file_name
 

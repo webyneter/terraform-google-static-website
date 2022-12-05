@@ -26,6 +26,18 @@ variable "bucket_region" {
 # Optional variables
 # ==================
 
+variable "website_bucket_force_destroy" {
+  description = "The website bucket force_destroy argument value."
+  type        = bool
+  default     = false
+}
+
+variable "website_usage_logs_bucket_force_destroy" {
+  description = "The website usage logs bucket force_destroy argument value."
+  type        = bool
+  default     = false
+}
+
 variable "bucket_backend_custom_response_headers" {
   description = "Bucket backend custom response headers"
   type        = list(string)

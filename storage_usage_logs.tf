@@ -8,6 +8,8 @@ resource "google_storage_bucket" "website_usage_logs" {
   location                    = upper(var.bucket_region)
   storage_class               = "STANDARD"
   uniform_bucket_level_access = true
+
+  force_destroy = var.website_usage_logs_bucket_force_destroy
 }
 
 resource "google_storage_bucket_iam_member" "website_usage_logs" {
