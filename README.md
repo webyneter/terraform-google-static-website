@@ -1,6 +1,7 @@
-# terraform-google-static-website 
+# terraform-google-static-website
 
-A [Terraform module](https://registry.terraform.io/modules/webyneter/static-website/google/latest) for creating a static website hosted in a Google Cloud Storage Bucket. 
+A [Terraform module](https://registry.terraform.io/modules/webyneter/static-website/google/latest) for creating a static
+website hosted in a Google Cloud Storage Bucket.
 
 ## Prerequisites
 

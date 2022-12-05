@@ -26,7 +26,8 @@ resource "google_compute_managed_ssl_certificate" "website" {
 
   managed {
     domains = [
-    var.website_domain]
+      var.website_domain
+    ]
   }
 
   lifecycle {
